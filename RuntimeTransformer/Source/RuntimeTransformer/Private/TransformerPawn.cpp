@@ -109,10 +109,10 @@ void ATransformerPawn::FilterHits(TArray<FHitResult>& outHits)
 		for (auto Iter = outHits.CreateIterator(); Iter; ++Iter)
 		{
 			//don't remove Gizmos! They do not replicate by default 
-			if(Cast<ABaseGizmo>(Iter->Actor))
+			if(Cast<ABaseGizmo>(Iter->HitObjectHandle.FetchActor()))
 				continue;
 		
-			if (Iter->Actor.IsValid() && Iter->Actor->IsSupportedForNetworking())
+			if (Iter->HitObjectHandle.IsValid() && Iter->HitObjectHandle.FetchActor()->IsSupportedForNetworking())
 			{
 				if (bComponentBased)
 				{
@@ -123,10 +123,10 @@ void ATransformerPawn::FilterHits(TArray<FHitResult>& outHits)
 					continue; //actors only consider whether they replicate
 			}
 
-			if (Iter->Actor.IsValid() && Iter->Component.IsValid())
+			if (Iter->HitObjectHandle.IsValid() && Iter->Component.IsValid())
 			{
 				UE_LOG(LogRuntimeTransformer, Warning, TEXT("Removing (Actor: %s   ComponentHit:  %s) from hits because it is not supported for networking.")
-					, *Iter->Actor->GetName(), *Iter->Component->GetName());
+					, *Iter->HitObjectHandle.GetName(), *Iter->Component->GetName());
 			}
 			
 			Iter.RemoveCurrent();
@@ -470,7 +470,7 @@ bool ATransformerPawn::HandleTracedObjects(const TArray<FHitResult>& HitResults
 
 	for (auto& hits : HitResults)
 	{
-		if (Cast<ABaseGizmo>(hits.Actor))
+		if (Cast<ABaseGizmo>(hits.HitObjectHandle.FetchActor()))
 			continue; //ignore other Gizmos.
 
 		if (bComponentBased)
